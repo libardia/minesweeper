@@ -2,16 +2,19 @@ from collections import defaultdict
 import pygame as pg
 import static
 import const
-import util
+import img
 from go import GameObject
+from go_smile import goSmile
 
 
 class Game:
     def __init__(self) -> None:
         pg.init()
         self.quit = False
+        self.clock = pg.time.Clock()
+        self.dt = self.clock.tick(const.FPS)
         self.screen = pg.display.set_mode(
-            (const.SCREEN_WIDTH, const.SCREEN_HEIGHT))
+            (const.SCREEN_WIDTH, const.SCREEN_HEIGHT), flags=pg.DOUBLEBUF, vsync=1)
         # [depth, [id, go]]
         self.gameObjects: dict[int, dict[int, GameObject]] = {0: {}}
         self.depthBounds = [0, 0]
@@ -19,7 +22,11 @@ class Game:
         self.eventQueues: dict[pg.event._EventTypes,
                                dict[int, GameObject]] = {}
 
-    def add(self, go: GameObject, depth: int):
+        # First setup
+        static.image = img.Images()
+        self.add(goSmile())
+
+    def add(self, go: GameObject, depth: int = 0):
         if depth < self.depthBounds[0]:
             self.depthBounds[0] = depth
         if depth > self.depthBounds[1]:
@@ -29,14 +36,16 @@ class Game:
         self.gameObjects[depth][go.id] = go
 
     def remove(self, go: GameObject):
-        for k, v in self.gameObjects.items():
-            v.pop(go.id, None)
-        self.gameObjects = {k: v for k, v in self.gameObjects if len(v) > 0}
-        for k, v in self.eventQueues.items():
-            v.pop(go.id, None)
-        self.eventQueues = {k: v for k, v in self.eventQueues if len(v) > 0}
+        for depth, gos in self.gameObjects.items():
+            gos.pop(go.id, None)
+        self.gameObjects = {depth: gos for depth,
+                            gos in self.gameObjects if len(gos) > 0}
+        for evtype, gos in self.eventQueues.items():
+            gos.pop(go.id, None)
+        self.eventQueues = {evtype: gos for evtype,
+                            gos in self.eventQueues if len(gos) > 0}
 
-    def registerEvent(self, go: GameObject, type: pg.event._EventTypes):
+    def registerEvent(self, go: GameObject, type):
         if type not in self.eventQueues:
             self.eventQueues[type] = {}
         self.eventQueues[type][go.id] = go
@@ -49,10 +58,10 @@ class Game:
         self.screen.fill(const.BG_COLOR)
 
         # Draw from lowest to highest depth
-        for i in range(self.depthBounds[0], self.depthBounds[1] + 1):
-            if i in self.gameObjects:
-                for k, v in self.gameObjects[i].items():
-                    v.draw()
+        for depth in range(self.depthBounds[0], self.depthBounds[1] + 1):
+            if depth in self.gameObjects:
+                for id, go in self.gameObjects[depth].items():
+                    go.draw(self.dt)
 
         pg.display.flip()
 
@@ -60,12 +69,16 @@ class Game:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quit = True
+        pg.event.pump()
 
     def update(self) -> None:
-        pass
+        for depth, gos in self.gameObjects.items():
+            for id, go in gos.items():
+                go.update(self.dt)
 
     def main(self) -> None:
         while not self.quit:
+            self.dt = self.clock.tick(const.FPS)
             self.update()
             self.draw()
             self.handleEvents()
