@@ -11,9 +11,6 @@ class goSmile(GameObject):
         self.dx = speed
         self.dy = speed
 
-    def draw(self, dt):
-        static.game.screen.blit(self.img, (self.x, self.y))
-
     def update(self, dt):
         self.x += self.dx * dt
         self.y += self.dy * dt

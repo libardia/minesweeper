@@ -6,13 +6,15 @@ import util
 class GameObject:
     def __init__(self) -> None:
         self.id = util.getuuid()
+        self.img = None
         self.x = 0.0
         self.y = 0.0
 
-    # Placeholder for fake polymorphism
+    # Can be overridden
     def draw(self, dt) -> None:
-        pass
+        if self.img is not None:
+            static.game.screen.blit(self.img, (self.x, self.y))
 
-    # Placeholder for fake polymorphism
+    # Placeholder to be overridden
     def update(self, dt) -> None:
         pass
