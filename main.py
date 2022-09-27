@@ -8,7 +8,6 @@ class Game:
         pg.init()
         self.quit = False
         self.screen = pg.display.set_mode((const.SCREEN_WIDTH, const.SCREEN_HEIGHT))
-        self.events = EventHandler()
         self.eventQueues: dict[pg.event._EventTypes, list[GameObject]] = {}
     
     def draw(self) -> None:
