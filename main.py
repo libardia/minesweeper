@@ -1,6 +1,5 @@
 import pygame as pg
 import static, const
-from events import EventHandler
 from go import GameObject
 
 class Game:
