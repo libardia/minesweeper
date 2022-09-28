@@ -2,7 +2,6 @@ import pygame as pg
 from go import GameObject
 from cellstate import CellState
 import static
-import const
 
 
 class goCell(GameObject):
@@ -10,15 +9,50 @@ class goCell(GameObject):
         super().__init__()
         self.state = CellState.CLOSED
         self.changeState(CellState.CLOSED)
-        self.neighbors = 0
-        self.bomb = False
-        static.game.registerEvent(self, pg.MOUSEBUTTONDOWN)
+        self.near = 0
+        self.nearCells: list[goCell] = []
+        self.mine = False
+        self.pressed = False
+        self.gx = 0
+        self.gy = 0
 
     def reveal(self):
-        if self.bomb:
-            self.changeState(CellState.LOST_GAME)
-        else:
-            self.changeState(CellState.OPEN)
+        if self.state == CellState.CLOSED:
+            if self.mine:
+                self.changeState(CellState.LOST_GAME)
+            elif self.state != CellState.OPEN:
+                self.changeState(CellState.OPEN)
+                if self.near == 0:
+                    for c in self.nearCells:
+                        c.reveal()
+
+    def press(self):
+        if self.state == CellState.CLOSED:
+            self.pressed = True
+            self.img = static.image.pressed
+
+    def unpress(self):
+        self.pressed = False
+        if self.state == CellState.CLOSED:
+            self.img = static.image.closed
+
+    def pressAround(self):
+        for cell in self.nearCells:
+            cell.press()
+
+    def surroundingFlagged(self):
+        result = 0
+        for cell in self.nearCells:
+            if cell.state == CellState.FLAGGED:
+                result += 1
+        return result
+
+    def surroundingNonOpen(self):
+        result = 0
+        for cell in self.nearCells:
+            if cell.state != CellState.OPEN:
+                result += 1
+        return result
 
     def changeState(self, state):
         prev = self.state
@@ -28,10 +62,8 @@ class goCell(GameObject):
                 self.img = static.image.closed
             case CellState.FLAGGED:
                 self.img = static.image.flagged
-            case CellState.PRESSED:
-                self.img = static.image.pressed
             case CellState.OPEN:
-                if self.bomb:
+                if self.mine:
                     # If this cell had a bomb, show it
                     # (this would happen at the end of the game, win or lose)
                     self.img = static.image.open_mine
@@ -44,19 +76,42 @@ class goCell(GameObject):
                     else:
                         # If this cell didn't have a bomb and wasn't flagged, show
                         # the number of surrounding mines (normal open)
-                        self.img = static.image.open[self.neighbors]
+                        self.img = static.image.open[self.near]
             case CellState.LOST_GAME:
                 self.img = static.image.open_mine_red
 
-    def handleEvents(self, event, dt) -> None:
-        if pg.Rect(self.x, self.y, const.CELL_PX_WIDTH, const.CELL_PX_HEIGHT).collidepoint(event.pos):
-            if event.button == pg.BUTTON_LEFT:
-                if self.state == CellState.CLOSED:
-                    self.changeState(CellState.OPEN)
-                elif self.state == CellState.OPEN:
-                    self.changeState(CellState.CLOSED)
-            elif event.button == pg.BUTTON_RIGHT:
-                if self.state == CellState.CLOSED:
-                    self.changeState(CellState.FLAGGED)
-                elif self.state == CellState.FLAGGED:
-                    self.changeState(CellState.CLOSED)
+    def handleEvents(self, event, gridPosition: tuple[int, int], dt) -> None:
+        if self.pressed and event.type == pg.MOUSEBUTTONUP and event.button == pg.BUTTON_LEFT:
+            self.unpress()
+        if gridPosition == (self.gx, self.gy):
+            match event.type:
+                case pg.MOUSEBUTTONUP:
+                    match event.button:
+                        case pg.BUTTON_LEFT:
+                            match self.state:
+                                case CellState.CLOSED:
+                                    self.reveal()
+                                case CellState.OPEN:
+                                    if self.surroundingFlagged() == self.near:
+                                        for cell in self.nearCells:
+                                            cell.reveal()
+                case pg.MOUSEBUTTONDOWN:
+                    match event.button:
+                        case pg.BUTTON_LEFT:
+                            match self.state:
+                                case CellState.OPEN:
+                                    self.pressAround()
+                                case CellState.CLOSED:
+                                    self.press()
+                        case pg.BUTTON_RIGHT:
+                            match self.state:
+                                case CellState.CLOSED:
+                                    self.changeState(CellState.FLAGGED)
+                                case CellState.FLAGGED:
+                                    self.changeState(CellState.CLOSED)
+                                case CellState.OPEN:
+                                    if self.surroundingNonOpen() == self.near:
+                                        for cell in self.nearCells:
+                                            if cell.state == CellState.CLOSED:
+                                                cell.changeState(
+                                                    CellState.FLAGGED)
