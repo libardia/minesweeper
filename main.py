@@ -98,4 +98,6 @@ if __name__ == "__main__":
     static.game = Game()
     static.game.initialize()
     static.game.main()
+    pg.display.quit()
+    pg.quit()
     print('Quit gracefully.')
