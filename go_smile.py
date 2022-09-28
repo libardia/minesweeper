@@ -1,6 +1,7 @@
 from xmlrpc.server import DocXMLRPCRequestHandler
 from go import GameObject
-import static, const
+import static
+import const
 
 
 class goSmile(GameObject):

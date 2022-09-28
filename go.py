@@ -18,3 +18,7 @@ class GameObject:
     # Placeholder to be overridden
     def update(self, dt) -> None:
         pass
+
+    # Placeholder to be overridden
+    def handleEvents(self, event, dt) -> None:
+        pass

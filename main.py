@@ -4,27 +4,34 @@ import static
 import const
 import img
 from go import GameObject
-from go_smile import goSmile
+from go_grid import goGrid
 
 
 class Game:
     def __init__(self) -> None:
         pg.init()
+        pg.display.set_caption('Minesweeper')
+        pg.display.set_icon(pg.image.load(const.IMAGE_PATH + 'cf.png'))
         self.quit = False
         self.clock = pg.time.Clock()
         self.dt = self.clock.tick(const.FPS)
-        self.screen = pg.display.set_mode(
-            (const.SCREEN_WIDTH, const.SCREEN_HEIGHT), flags=pg.DOUBLEBUF, vsync=1)
         # [depth, [id, go]]
         self.gameObjects: dict[int, dict[int, GameObject]] = {0: {}}
         self.depthBounds = [0, 0]
         # [event type, [id, go]]
         self.eventQueues: dict[pg.event._EventTypes,
                                dict[int, GameObject]] = {}
-
-        # First setup
         static.image = img.Images()
-        self.add(goSmile())
+
+    def initialize(self):
+        static.image.loadMS()
+        self.add(goGrid(const.GRID_WIDTH, const.GRID_HEIGHT))
+        self.setupScreen(const.GRID_WIDTH * const.CELL_PX_WIDTH,
+                         const.GRID_HEIGHT * const.CELL_PX_HEIGHT)
+
+    def setupScreen(self, width, height):
+        self.screen = pg.display.set_mode(
+            (width, height), flags=pg.DOUBLEBUF, vsync=1)
 
     def add(self, go: GameObject, depth: int = 0):
         if depth < self.depthBounds[0]:
@@ -69,7 +76,9 @@ class Game:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quit = True
-        pg.event.pump()
+            elif event.type in self.eventQueues:
+                for id, go in self.eventQueues[event.type].items():
+                    go.handleEvents(event, self.dt)
 
     def update(self) -> None:
         for depth, gos in self.gameObjects.items():
@@ -86,5 +95,6 @@ class Game:
 
 if __name__ == "__main__":
     static.game = Game()
+    static.game.initialize()
     static.game.main()
     print('Quit gracefully.')
