@@ -25,6 +25,7 @@ class Game:
 
     def initialize(self):
         static.image.loadMS()
+        self.lost = False
         self.add(goGrid(const.GRID_WIDTH, const.GRID_HEIGHT, const.GRID_MINES))
         self.setupScreen(const.GRID_WIDTH * const.CELL_PX_WIDTH,
                          const.GRID_HEIGHT * const.CELL_PX_HEIGHT)

@@ -1,5 +1,6 @@
 import pygame as pg
 import random
+from cellstate import CellState
 from go import GameObject
 from go_cell import goCell
 import const
@@ -60,11 +61,17 @@ class goGrid(GameObject):
                 go.draw(dt)
 
     def handleEvents(self, event, dt):
-        gx = (event.pos[0] - self.x) // const.CELL_PX_WIDTH
-        gy = (event.pos[1] - self.y) // const.CELL_PX_HEIGHT
+        gx = int((event.pos[0] - self.x) // const.CELL_PX_WIDTH)
+        gy = int((event.pos[1] - self.y) // const.CELL_PX_HEIGHT)
         if self.firstClick:
             self.placeMines((gx, gy))
             self.firstClick = False
         for row in self.grid:
             for go in row:
                 go.handleEvents(event, (gx, gy), dt)
+        if static.game.lost:
+            for y in range(self.height):
+                for x in range(self.width):
+                    cell = self.grid[y][x]
+                    if cell.state != CellState.LOST_GAME:
+                        cell.changeState(CellState.OPEN)

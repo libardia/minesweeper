@@ -20,6 +20,7 @@ class goCell(GameObject):
         if self.state == CellState.CLOSED:
             if self.mine:
                 self.changeState(CellState.LOST_GAME)
+                static.game.lost = True
             elif self.state != CellState.OPEN:
                 self.changeState(CellState.OPEN)
                 if self.near == 0:
