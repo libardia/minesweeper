@@ -68,7 +68,7 @@ class goGrid(GameObject):
                     self.grid[y][x].unpress()
         gx = int((event.pos[0] - self.x) // const.CELL_PX_WIDTH)
         gy = int((event.pos[1] - self.y) // const.CELL_PX_HEIGHT)
-        if self.firstClick:
+        if event.type == pg.MOUSEBUTTONUP and self.firstClick:
             self.placeMines((gx, gy))
             self.firstClick = False
         for row in self.grid:
