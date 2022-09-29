@@ -26,6 +26,7 @@ class goGrid(GameObject):
                 self.grid[y].append(c)
         static.game.registerEvent(self, pg.MOUSEBUTTONDOWN)
         static.game.registerEvent(self, pg.MOUSEBUTTONUP)
+        static.game.registerEvent(self, pg.MOUSEMOTION)
 
     def positionInGrid(self, pos: tuple[int, int]):
         return pos[0] >= 0 and pos[0] < self.width and pos[1] >= 0 and pos[1] < self.height
@@ -61,6 +62,10 @@ class goGrid(GameObject):
                 go.draw(dt)
 
     def handleEvents(self, event, dt):
+        if (event.type == pg.MOUSEBUTTONUP and event.button == pg.BUTTON_LEFT) or (event.type == pg.MOUSEMOTION and event.buttons[0] == 1):
+            for y in range(self.height):
+                for x in range(self.width):
+                    self.grid[y][x].unpress()
         gx = int((event.pos[0] - self.x) // const.CELL_PX_WIDTH)
         gy = int((event.pos[1] - self.y) // const.CELL_PX_HEIGHT)
         if self.firstClick:

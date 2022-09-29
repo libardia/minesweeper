@@ -82,37 +82,33 @@ class goCell(GameObject):
                 self.img = static.image.open_mine_red
 
     def handleEvents(self, event, gridPosition: tuple[int, int], dt) -> None:
-        if self.pressed and event.type == pg.MOUSEBUTTONUP and event.button == pg.BUTTON_LEFT:
-            self.unpress()
         if gridPosition == (self.gx, self.gy):
-            match event.type:
-                case pg.MOUSEBUTTONUP:
-                    match event.button:
-                        case pg.BUTTON_LEFT:
-                            match self.state:
-                                case CellState.CLOSED:
-                                    self.reveal()
-                                case CellState.OPEN:
-                                    if self.surroundingFlagged() == self.near:
-                                        for cell in self.nearCells:
-                                            cell.reveal()
-                case pg.MOUSEBUTTONDOWN:
-                    match event.button:
-                        case pg.BUTTON_LEFT:
-                            match self.state:
-                                case CellState.OPEN:
-                                    self.pressAround()
-                                case CellState.CLOSED:
-                                    self.press()
-                        case pg.BUTTON_RIGHT:
-                            match self.state:
-                                case CellState.CLOSED:
-                                    self.changeState(CellState.FLAGGED)
-                                case CellState.FLAGGED:
-                                    self.changeState(CellState.CLOSED)
-                                case CellState.OPEN:
-                                    if self.surroundingNonOpen() == self.near:
-                                        for cell in self.nearCells:
-                                            if cell.state == CellState.CLOSED:
-                                                cell.changeState(
-                                                    CellState.FLAGGED)
+            if event.type == pg.MOUSEBUTTONUP:
+                match event.button:
+                    case pg.BUTTON_LEFT:
+                        match self.state:
+                            case CellState.CLOSED:
+                                self.reveal()
+                            case CellState.OPEN:
+                                if self.surroundingFlagged() == self.near:
+                                    for cell in self.nearCells:
+                                        cell.reveal()
+            elif (event.type == pg.MOUSEBUTTONDOWN and event.button == pg.BUTTON_LEFT) or (event.type == pg.MOUSEMOTION and event.buttons[0] == 1):
+                match self.state:
+                    case CellState.OPEN:
+                        self.pressAround()
+                    case CellState.CLOSED:
+                        self.press()
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == pg.BUTTON_RIGHT:
+                    match self.state:
+                        case CellState.CLOSED:
+                            self.changeState(CellState.FLAGGED)
+                        case CellState.FLAGGED:
+                            self.changeState(CellState.CLOSED)
+                        case CellState.OPEN:
+                            if self.surroundingNonOpen() == self.near:
+                                for cell in self.nearCells:
+                                    if cell.state == CellState.CLOSED:
+                                        cell.changeState(
+                                            CellState.FLAGGED)
