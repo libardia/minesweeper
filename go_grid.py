@@ -32,6 +32,8 @@ class goGrid(GameObject):
         return pos[0] >= 0 and pos[0] < self.width and pos[1] >= 0 and pos[1] < self.height
 
     def placeMines(self, clickPos: tuple[int, int]):
+        # Positions that can't have mines
+        safe = [(clickPos[0]+dx, clickPos[1]+dy) for dx in (-1,0,1) for dy in (-1,0,1)]
         # Place mines
         for _ in range(self.mines):
             # Keep trying if we try to put a mine where there already is one
@@ -39,7 +41,7 @@ class goGrid(GameObject):
             while retry:
                 mx = random.randint(0, self.width-1)
                 my = random.randint(0, self.height-1)
-                if not self.grid[my][mx].mine and (mx, my) != clickPos:
+                if not self.grid[my][mx].mine and (mx, my) not in safe:
                     self.grid[my][mx].mine = True
                     # We placed a mine, so we're done trying
                     retry = False
