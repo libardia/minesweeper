@@ -5,11 +5,16 @@ import const
 import img
 from go import GameObject
 from go_grid import goGrid
+from go_ui import goUI
 
 
 class Game:
     def __init__(self) -> None:
         pg.init()
+        w = const.GRID_WIDTH * const.CELL_PX_WIDTH + 2 * const.WINDOW_PADDING
+        h = const.GRID_HEIGHT * const.CELL_PX_HEIGHT + \
+            2 * const.WINDOW_PADDING + const.UI_SPACE
+        self.setupScreen(w, h)
         pg.display.set_caption('Minesweeper')
         pg.display.set_icon(pg.image.load(const.IMAGE_PATH + 'cf.png'))
         self.quit = False
@@ -30,10 +35,7 @@ class Game:
         grid.x = const.WINDOW_PADDING
         grid.y = const.WINDOW_PADDING + const.UI_SPACE
         self.add(grid)
-        w = const.GRID_WIDTH * const.CELL_PX_WIDTH + 2 * const.WINDOW_PADDING
-        h = const.GRID_HEIGHT * const.CELL_PX_HEIGHT + \
-            2 * const.WINDOW_PADDING + const.UI_SPACE
-        self.setupScreen(w, h)
+        self.add(goUI())
 
     def setupScreen(self, width, height):
         self.screen = pg.display.set_mode(
@@ -47,21 +49,37 @@ class Game:
         if depth not in self.depthBounds:
             self.depthBounds[depth] = {}
         self.gameObjects[depth][go.id] = go
+        go.onAdd()
 
     def findGameObject(self, id):
-        for depth, gos in self.gameObjects:
+        for depth, gos in self.gameObjects.items():
             if id in gos:
                 return gos[id]
 
-    def remove(self, go: GameObject):
+    def findGameObjectByType(self, type):
         for depth, gos in self.gameObjects.items():
-            gos.pop(go.id, None)
-        self.gameObjects = {depth: gos for depth,
-                            gos in self.gameObjects if len(gos) > 0}
+            for id, go in gos.items():
+                if isinstance(go, type):
+                    return go
+
+    def remove(self, id: int):
+        for depth, gos in self.gameObjects.items():
+            if id in gos:
+                gos[id].onRemove()
+                gos.pop(id)
+                break
         for evtype, gos in self.eventQueues.items():
-            gos.pop(go.id, None)
+            if id in gos:
+                gos.pop(id)
+                break
+        # Remove empty indexes
+        self.gameObjects = {depth: gos for depth,
+                            gos in self.gameObjects.items() if len(gos) > 0}
         self.eventQueues = {evtype: gos for evtype,
-                            gos in self.eventQueues if len(gos) > 0}
+                            gos in self.eventQueues.items() if len(gos) > 0}
+
+    def remove(self, go: GameObject):
+        self.remove(go.id)
 
     def registerEvent(self, go: GameObject, type):
         if type not in self.eventQueues:

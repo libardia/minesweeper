@@ -5,8 +5,9 @@ import static
 
 
 class goCell(GameObject):
-    def __init__(self) -> None:
+    def __init__(self, grid) -> None:
         super().__init__()
+        self.goGrid = grid
         self.state = CellState.CLOSED
         self.changeState(CellState.CLOSED)
         self.near = 0
@@ -23,6 +24,7 @@ class goCell(GameObject):
                 static.game.lost = True
             elif self.state != CellState.OPEN:
                 self.changeState(CellState.OPEN)
+                self.goGrid.hidden -= 1
                 if self.near == 0:
                     for c in self.nearCells:
                         c.reveal()
@@ -104,11 +106,14 @@ class goCell(GameObject):
                     match self.state:
                         case CellState.CLOSED:
                             self.changeState(CellState.FLAGGED)
+                            self.goGrid.flagged += 1
                         case CellState.FLAGGED:
                             self.changeState(CellState.CLOSED)
+                            self.goGrid.flagged -= 1
                         case CellState.OPEN:
                             if self.surroundingNonOpen() == self.near:
                                 for cell in self.nearCells:
                                     if cell.state == CellState.CLOSED:
                                         cell.changeState(
                                             CellState.FLAGGED)
+                                        self.goGrid.flagged += 1

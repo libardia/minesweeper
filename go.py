@@ -10,6 +10,14 @@ class GameObject:
         self.x = 0.0
         self.y = 0.0
 
+    # Placeholder to be overridden
+    def onAdd(self):
+        pass
+
+    # Placeholder to be overridden
+    def onRemove(self):
+        pass
+
     # Can be overridden
     def draw(self, dt) -> None:
         if self.img is not None:

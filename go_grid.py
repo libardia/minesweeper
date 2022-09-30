@@ -13,14 +13,19 @@ class goGrid(GameObject):
         self.width = width
         self.height = height
         self.mines = mines
+        self.flagged = 0
+        self.hidden = width * height
         self.firstClick = True
         self.grid: list[list[goCell]] = []
-        for y in range(height):
+
+    def onAdd(self):
+        for y in range(self.height):
             self.grid.append([])
-            for x in range(width):
-                c = goCell()
+            for x in range(self.width):
+                c = goCell(self)
                 c.gx = x
                 c.gy = y
+                c.onAdd()
                 self.grid[y].append(c)
         static.game.registerEvent(self, pg.MOUSEBUTTONDOWN)
         static.game.registerEvent(self, pg.MOUSEBUTTONUP)
