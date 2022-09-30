@@ -26,9 +26,14 @@ class Game:
     def initialize(self):
         static.image.loadMS()
         self.lost = False
-        self.add(goGrid(const.GRID_WIDTH, const.GRID_HEIGHT, const.GRID_MINES))
-        self.setupScreen(const.GRID_WIDTH * const.CELL_PX_WIDTH,
-                         const.GRID_HEIGHT * const.CELL_PX_HEIGHT)
+        grid = goGrid(const.GRID_WIDTH, const.GRID_HEIGHT, const.GRID_MINES)
+        grid.x = const.WINDOW_PADDING
+        grid.y = const.WINDOW_PADDING + const.UI_SPACE
+        self.add(grid)
+        w = const.GRID_WIDTH * const.CELL_PX_WIDTH + 2 * const.WINDOW_PADDING
+        h = const.GRID_HEIGHT * const.CELL_PX_HEIGHT + \
+            2 * const.WINDOW_PADDING + const.UI_SPACE
+        self.setupScreen(w, h)
 
     def setupScreen(self, width, height):
         self.screen = pg.display.set_mode(
@@ -42,6 +47,11 @@ class Game:
         if depth not in self.depthBounds:
             self.depthBounds[depth] = {}
         self.gameObjects[depth][go.id] = go
+
+    def findGameObject(self, id):
+        for depth, gos in self.gameObjects:
+            if id in gos:
+                return gos[id]
 
     def remove(self, go: GameObject):
         for depth, gos in self.gameObjects.items():

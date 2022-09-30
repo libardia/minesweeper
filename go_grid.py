@@ -20,9 +20,7 @@ class goGrid(GameObject):
             for x in range(width):
                 c = goCell()
                 c.gx = x
-                c.x = self.x + (x * const.CELL_PX_WIDTH)
                 c.gy = y
-                c.y = self.y + (y * const.CELL_PX_HEIGHT)
                 self.grid[y].append(c)
         static.game.registerEvent(self, pg.MOUSEBUTTONDOWN)
         static.game.registerEvent(self, pg.MOUSEBUTTONUP)
@@ -33,7 +31,8 @@ class goGrid(GameObject):
 
     def placeMines(self, clickPos: tuple[int, int]):
         # Positions that can't have mines
-        safe = [(clickPos[0]+dx, clickPos[1]+dy) for dx in (-1,0,1) for dy in (-1,0,1)]
+        safe = [(clickPos[0]+dx, clickPos[1]+dy)
+                for dx in (-1, 0, 1) for dy in (-1, 0, 1)]
         # Place mines
         for _ in range(self.mines):
             # Keep trying if we try to put a mine where there already is one
@@ -62,6 +61,13 @@ class goGrid(GameObject):
         for row in self.grid:
             for go in row:
                 go.draw(dt)
+
+    def update(self, dt):
+        for x in range(self.width):
+            for y in range(self.height):
+                c = self.grid[y][x]
+                c.x = self.x + (x * const.CELL_PX_WIDTH)
+                c.y = self.y + (y * const.CELL_PX_HEIGHT)
 
     def handleEvents(self, event, dt):
         if (event.type == pg.MOUSEBUTTONUP and event.button == pg.BUTTON_LEFT) or (event.type == pg.MOUSEMOTION and event.buttons[0] == 1):
