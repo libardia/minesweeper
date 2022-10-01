@@ -21,7 +21,9 @@ class goCell(GameObject):
         if self.state == CellState.CLOSED:
             if self.mine:
                 self.changeState(CellState.LOST_GAME)
-                static.game.lost = True
+                static.game.playing = False
+                static.game.wonGame = False
+                static.game.finalize = True
             elif self.state != CellState.OPEN:
                 self.changeState(CellState.OPEN)
                 self.goGrid.hidden -= 1

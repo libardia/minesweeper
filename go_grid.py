@@ -73,6 +73,12 @@ class goGrid(GameObject):
                 c = self.grid[y][x]
                 c.x = self.x + (x * const.CELL_PX_WIDTH)
                 c.y = self.y + (y * const.CELL_PX_HEIGHT)
+        if not static.game.playing and not static.game.wonGame and static.game.finalize:
+            for y in range(self.height):
+                for x in range(self.width):
+                    cell = self.grid[y][x]
+                    if cell.state != CellState.LOST_GAME:
+                        cell.changeState(CellState.OPEN)
 
     def handleEvents(self, event, dt):
         if (event.type == pg.MOUSEBUTTONUP and event.button == pg.BUTTON_LEFT) or (event.type == pg.MOUSEMOTION and event.buttons[0] == 1):
@@ -87,9 +93,3 @@ class goGrid(GameObject):
         for row in self.grid:
             for go in row:
                 go.handleEvents(event, (gx, gy), dt)
-        if static.game.lost:
-            for y in range(self.height):
-                for x in range(self.width):
-                    cell = self.grid[y][x]
-                    if cell.state != CellState.LOST_GAME:
-                        cell.changeState(CellState.OPEN)

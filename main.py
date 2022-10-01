@@ -1,11 +1,10 @@
-from collections import defaultdict
 import pygame as pg
 import static
 import const
 import img
 from go import GameObject
 from go_grid import goGrid
-from go_ui import goUI
+from go_mineui import goMineUI
 
 
 class Game:
@@ -30,12 +29,17 @@ class Game:
 
     def initialize(self):
         static.image.loadMS()
-        self.lost = False
+        # Whether the game is currently going
+        self.playing = True
+        # Outcome of the game; true is win, false is loss
+        self.wonGame = True
+        # We should finalize things at the end of the game (used on loss to open all the remaining cells)
+        self.finalize = False
         grid = goGrid(const.GRID_WIDTH, const.GRID_HEIGHT, const.GRID_MINES)
         grid.x = const.WINDOW_PADDING
         grid.y = const.WINDOW_PADDING + const.UI_SPACE
         self.add(grid)
-        self.add(goUI())
+        self.add(goMineUI())
 
     def setupScreen(self, width, height):
         self.screen = pg.display.set_mode(
@@ -113,6 +117,9 @@ class Game:
         for depth, gos in self.gameObjects.items():
             for id, go in gos.items():
                 go.update(self.dt)
+        # Turn finalize off after updating everything else; this is so this flag is only active for one frame
+        if self.finalize:
+            self.finalize = False
 
     def main(self) -> None:
         while not self.quit:

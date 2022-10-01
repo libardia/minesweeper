@@ -5,7 +5,7 @@ import static
 import const
 
 
-class goUI(GameObject):
+class goMineUI(GameObject):
     def __init__(self) -> None:
         super().__init__()
 
@@ -19,8 +19,11 @@ class goUI(GameObject):
 
     def update(self, dt):
         self.remaining = self.goGrid.mines - self.goGrid.flagged
-        self.img = self.font.render(
-            f'Remaining mines: {self.remaining:02}', True, const.UI_COLOR)
+        if static.game.playing:
+            self.img = self.font.render(
+                f'Remaining mines: {self.remaining:02}', True, const.UI_COLOR)
+        elif static.game.finalize:
+            self.img = self.font.render('Press R to restart.', True, const.UI_COLOR)
         r = self.img.get_rect()
         self.width = r.width
         self.height = r.height
