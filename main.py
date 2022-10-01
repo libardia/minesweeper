@@ -7,6 +7,7 @@ from go import GameObject
 from go_grid import goGrid
 from go_mineui import goMineUI
 from go_resultui import goResultUI
+from go_resethandler import goResetHandler
 
 
 class Game:
@@ -20,17 +21,17 @@ class Game:
         pg.display.set_icon(pg.image.load(const.IMAGE_PATH + 'cf.png'))
         self.quit = False
         self.clock = pg.time.Clock()
+        static.image = img.Images()
+        static.font = fnt.Fonts()
         self.dt = self.clock.tick(const.FPS)
+
+    def initialize(self):
         # [depth, [id, go]]
         self.gameObjects: dict[int, dict[int, GameObject]] = {0: {}}
         self.depthBounds = [0, 0]
         # [event type, [id, go]]
         self.eventQueues: dict[pg.event._EventTypes,
                                dict[int, GameObject]] = {}
-        static.image = img.Images()
-        static.font = fnt.Fonts()
-
-    def initialize(self):
         # Whether the game is currently going
         self.playing = True
         # Outcome of the game; true is win, false is loss
@@ -43,6 +44,7 @@ class Game:
         self.add(grid)
         self.add(goMineUI())
         self.add(goResultUI())
+        self.add(goResetHandler())
 
     def setupScreen(self, width, height):
         self.screen = pg.display.set_mode(

@@ -19,6 +19,9 @@ class goGrid(GameObject):
         self.grid: list[list[goCell]] = []
 
     def onAdd(self):
+        static.game.registerEvent(self, pg.MOUSEBUTTONDOWN)
+        static.game.registerEvent(self, pg.MOUSEBUTTONUP)
+        static.game.registerEvent(self, pg.MOUSEMOTION)
         for y in range(self.height):
             self.grid.append([])
             for x in range(self.width):
@@ -27,9 +30,6 @@ class goGrid(GameObject):
                 c.gy = y
                 c.onAdd()
                 self.grid[y].append(c)
-        static.game.registerEvent(self, pg.MOUSEBUTTONDOWN)
-        static.game.registerEvent(self, pg.MOUSEBUTTONUP)
-        static.game.registerEvent(self, pg.MOUSEMOTION)
 
     def positionInGrid(self, pos: tuple[int, int]):
         return pos[0] >= 0 and pos[0] < self.width and pos[1] >= 0 and pos[1] < self.height
