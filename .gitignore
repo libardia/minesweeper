@@ -1,4 +1,6 @@
 __pycache__
+
+# pyinstaller
 dist
 build
 main.spec
