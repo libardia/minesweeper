@@ -3,13 +3,7 @@ import const
 
 
 class Images():
-    def loadImage(self, filename):
-        return pg.image.load(const.IMAGE_PATH + filename)
-
-    def loadSmile(self):
-        self.smile = self.loadImage('smile.png')
-
-    def loadMS(self):
+    def __init__(self) -> None:
         self.closed = self.loadImage('c.png')
         self.flagged = self.loadImage('cf.png')
         self.pressed = self.loadImage('ch.png')
@@ -17,3 +11,6 @@ class Images():
         self.open_mine = self.loadImage('om.png')
         self.open_mine_crossed = self.loadImage('omc.png')
         self.open_mine_red = self.loadImage('omr.png')
+
+    def loadImage(self, filename):
+        return pg.image.load(const.IMAGE_PATH + filename)

@@ -2,9 +2,11 @@ import pygame as pg
 import static
 import const
 import img
+import fnt
 from go import GameObject
 from go_grid import goGrid
 from go_mineui import goMineUI
+from go_resultui import goResultUI
 
 
 class Game:
@@ -26,9 +28,9 @@ class Game:
         self.eventQueues: dict[pg.event._EventTypes,
                                dict[int, GameObject]] = {}
         static.image = img.Images()
+        static.font = fnt.Fonts()
 
     def initialize(self):
-        static.image.loadMS()
         # Whether the game is currently going
         self.playing = True
         # Outcome of the game; true is win, false is loss
@@ -40,6 +42,7 @@ class Game:
         grid.y = const.WINDOW_PADDING + const.UI_SPACE
         self.add(grid)
         self.add(goMineUI())
+        self.add(goResultUI())
 
     def setupScreen(self, width, height):
         self.screen = pg.display.set_mode(

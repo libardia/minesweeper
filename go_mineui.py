@@ -1,4 +1,3 @@
-import pygame as pg
 from go import GameObject
 from go_grid import goGrid
 import static
@@ -11,7 +10,7 @@ class goMineUI(GameObject):
 
     def onAdd(self):
         self.goGrid: goGrid = static.game.findGameObjectByType(goGrid)
-        self.font = pg.font.Font(const.FONT_PATH + 'consolab.ttf', 32)
+        self.font = static.font.consolab32
         # Run update here to get the values of width and height from the render
         self.update(0)
         self.x = const.WINDOW_PADDING
