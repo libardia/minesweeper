@@ -3,6 +3,7 @@ import static
 import const
 import img
 import fnt
+import cfg
 from go import GameObject
 from go_grid import goGrid
 from go_mineui import goMineUI
@@ -13,16 +14,14 @@ from go_resethandler import goResetHandler
 class Game:
     def __init__(self) -> None:
         pg.init()
-        w = const.GRID_WIDTH * const.CELL_PX_WIDTH + 2 * const.WINDOW_PADDING
-        h = const.GRID_HEIGHT * const.CELL_PX_HEIGHT + \
-            2 * const.WINDOW_PADDING + const.UI_SPACE
-        self.setupScreen(w, h)
+
         pg.display.set_caption('Minesweeper')
         pg.display.set_icon(pg.image.load(const.IMAGE_PATH + 'cf.png'))
         self.quit = False
         self.clock = pg.time.Clock()
         static.image = img.Images()
         static.font = fnt.Fonts()
+        static.config = cfg.ConfigHolder()
         self.dt = self.clock.tick(const.FPS)
 
     def initialize(self):
@@ -38,13 +37,23 @@ class Game:
         self.wonGame = True
         # We should finalize things at the end of the game (used on loss to open all the remaining cells)
         self.finalize = False
-        grid = goGrid(const.GRID_WIDTH, const.GRID_HEIGHT, const.GRID_MINES)
+        gridWidth = static.config.getGridWidth()
+        gridHeight = static.config.getGridHeight()
+        numMines = static.config.getNumMines()
+        grid = goGrid(gridWidth, gridHeight, numMines)
+        screenWidth = gridWidth * const.CELL_PX_WIDTH + 2 * const.WINDOW_PADDING
+        screenHeight = gridHeight * const.CELL_PX_HEIGHT + \
+            2 * const.WINDOW_PADDING + const.UI_SPACE
+        self.setupScreen(screenWidth, screenHeight)
         grid.x = const.WINDOW_PADDING
         grid.y = const.WINDOW_PADDING + const.UI_SPACE
         self.add(grid)
         self.add(goMineUI())
         self.add(goResultUI())
         self.add(goResetHandler())
+
+    def deinitialize(self):
+        static.config.save()
 
     def setupScreen(self, width, height):
         self.screen = pg.display.set_mode(
@@ -141,6 +150,7 @@ if __name__ == "__main__":
     static.game = Game()
     static.game.initialize()
     static.game.main()
+    static.game.deinitialize()
     pg.display.quit()
     pg.quit()
     print('Quit gracefully.')
