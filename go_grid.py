@@ -68,11 +68,29 @@ class goGrid(GameObject):
                 go.draw(dt)
 
     def update(self, dt):
+        # Win if hidden = mines (but only do this once)
+        if static.game.playing and self.hidden == self.mines:
+            # If not all the hidden cells are flagged,
+            # flag them all
+            if self.flagged != self.mines:
+                for x in range(self.width):
+                    for y in range(self.height):
+                        cell = self.grid[y][x]
+                        if cell.state == CellState.CLOSED:
+                            cell.changeState(CellState.FLAGGED)
+                            self.flagged += 1
+            static.game.playing = False
+            static.game.wonGame = True
+            static.game.finalize = True
+            static.game.unregisterEvent(self.id)
+            static.game.unregisterEvent(self.id)
+            static.game.unregisterEvent(self.id)
         for x in range(self.width):
             for y in range(self.height):
                 c = self.grid[y][x]
                 c.x = self.x + (x * const.CELL_PX_WIDTH)
                 c.y = self.y + (y * const.CELL_PX_HEIGHT)
+
         if not static.game.playing and not static.game.wonGame and static.game.finalize:
             for y in range(self.height):
                 for x in range(self.width):

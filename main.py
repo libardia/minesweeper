@@ -87,13 +87,16 @@ class Game:
         self.eventQueues = {evtype: gos for evtype,
                             gos in self.eventQueues.items() if len(gos) > 0}
 
-    def remove(self, go: GameObject):
-        self.remove(go.id)
-
     def registerEvent(self, go: GameObject, type):
         if type not in self.eventQueues:
             self.eventQueues[type] = {}
         self.eventQueues[type][go.id] = go
+
+    def unregisterEvent(self, id: int):
+        for etype, gos in self.eventQueues.items():
+            if id in gos:
+                gos.pop(id)
+                break
 
     def validateDepth(self):
         keys = tuple(self.gameObjects.keys())
